@@ -1,0 +1,20 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor stuff
+.vscode/
+.idea/
+*.log
+
+# Node
+node_modules/
+package-lock.json
+yarn.lock
+dist/
+coverage/
+
+# Salesforce CLI
+.sfdx/
+.localdevserver/
+.deploy/
