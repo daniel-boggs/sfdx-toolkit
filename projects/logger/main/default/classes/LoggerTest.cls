@@ -75,13 +75,13 @@ private class LoggerTest {
         try { Logger.FATAL('Fatal with five vars: {}, {}, {}, {}, {}', '1', '2', '3', '4', '5'); } catch (Logger.FatalException ex) { messages.add(ex.getMessage()); }
         Test.stopTest();
 
-        System.assertEquals(6, messages.size(), 'All 6 FATAL variants should throw.');
-        System.assertEquals('Fatal no vars', messages[0]);
-        System.assertEquals('Fatal with one var: X', messages[1]);
-        System.assertEquals('Fatal with two vars: A, B', messages[2]);
-        System.assertEquals('Fatal with three vars: 1, 2, 3', messages[3]);
-        System.assertEquals('Fatal with four vars: One, Two, Three, Four', messages[4]);
-        System.assertEquals('Fatal with five vars: 1, 2, 3, 4, 5', messages[5]);
+        Assert.areEqual(6, messages.size(), 'All 6 FATAL variants should throw.');
+        Assert.areEqual('Fatal no vars', messages[0]);
+        Assert.areEqual('Fatal with one var: X', messages[1]);
+        Assert.areEqual('Fatal with two vars: A, B', messages[2]);
+        Assert.areEqual('Fatal with three vars: 1, 2, 3', messages[3]);
+        Assert.areEqual('Fatal with four vars: One, Two, Three, Four', messages[4]);
+        Assert.areEqual('Fatal with five vars: 1, 2, 3, 4, 5', messages[5]);
     }
 
     @IsTest
@@ -96,7 +96,7 @@ private class LoggerTest {
         }
         Test.stopTest();
 
-        System.assertEquals('The quick fox jumps over the lazy dog.', actualMessage, 'Placeholders should be replaced in order.');
+        Assert.areEqual('The quick fox jumps over the lazy dog.', actualMessage, 'Placeholders should be replaced in order.');
     }
 
     @IsTest
@@ -110,11 +110,11 @@ private class LoggerTest {
         try { Logger.FATAL('Boolean value: {}', true); } catch (Logger.FatalException ex) { messages.add(ex.getMessage()); }
         Test.stopTest();
 
-        System.assertEquals(4, messages.size(), 'All interpolation cases should throw.');
-        System.assertEquals('Price: $25', messages[0]);
-        System.assertEquals('Path: C:\\Logs\\Archive', messages[1]);
-        System.assertEquals('Null value: null', messages[2]);
-        System.assertEquals('Boolean value: true', messages[3]);
+        Assert.areEqual(4, messages.size(), 'All interpolation cases should throw.');
+        Assert.areEqual('Price: $25', messages[0]);
+        Assert.areEqual('Path: C:\\Logs\\Archive', messages[1]);
+        Assert.areEqual('Null value: null', messages[2]);
+        Assert.areEqual('Boolean value: true', messages[3]);
     }
 
     @IsTest
@@ -134,20 +134,20 @@ private class LoggerTest {
 
         // === Test context and noContext behavior ===
         Logger.setContext('CustomHandler.process');
-        System.assertEquals('CustomHandler.process', Logger.getContext(), 'Custom context should be available.');
+        Assert.areEqual('CustomHandler.process', Logger.getContext(), 'Custom context should be available.');
 
         Logger.DEBUG('Should show context');
 
         Logger.setNoContext(true);
-        System.assertEquals('', Logger.getContext(), 'Custom context should be suppressed.');
+        Assert.areEqual('', Logger.getContext(), 'Custom context should be suppressed.');
 
         Logger.INFO('Should hide context');
 
         Logger.setNoContext(false);
-        System.assertEquals('CustomHandler.process', Logger.getContext(), 'Custom context should be restored.');
+        Assert.areEqual('CustomHandler.process', Logger.getContext(), 'Custom context should be restored.');
 
         Logger.clearContext();
-        System.assertEquals(null, Logger.getContext(), 'Custom context should be cleared.');
+        Assert.isNull(Logger.getContext(), 'Custom context should be cleared.');
 
         Test.stopTest();
     }
@@ -175,7 +175,7 @@ private class LoggerTest {
         }
         Test.stopTest();
 
-        System.assertEquals('100', actualMessage, 'FATAL should convert object values to strings.');
+        Assert.areEqual('100', actualMessage, 'FATAL should convert object values to strings.');
     }
 
     @IsTest
@@ -184,6 +184,6 @@ private class LoggerTest {
         new Logger.Demo().run();
         Test.stopTest();
 
-        System.assertEquals(null, Logger.getContext(), 'Demo should clear its custom context.');
+        Assert.isNull(Logger.getContext(), 'Demo should clear its custom context.');
     }
 }
