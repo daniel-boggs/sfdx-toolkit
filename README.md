@@ -63,8 +63,10 @@ Projects follow Salesforce DX source conventions while remaining independently o
 
 ## About
 
-This repository is not tied to any specific Salesforce organization.
+This is my personal collection of Salesforce projects, utilities, and components I've built. Most started because I needed something, couldn't find a solution I liked, or figured I could build a better one.
 
-It contains reusable solutions developed from practical Salesforce development experience, with an emphasis on maintainability, simplicity, and minimizing dependencies.
+I've decided to clean them up, organize them, and share them with other developers who might find them useful.
+
+This repository is independent of Salesforce, any company, or Salesforce Partner. It's simply my work, shared with the developer community.
 
 New projects and improvements will be added over time.
