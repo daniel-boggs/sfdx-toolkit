@@ -2,55 +2,53 @@
 
 A lightweight, dependency-free logging utility for Salesforce Apex, inspired by SLF4J-style logging.
 
-Provides structured logging, message interpolation, execution context detection, and governor-limit monitoring without additional Salesforce configuration or dependencies.
+Provides structured messages, placeholder interpolation, automatic execution context detection, and governor-limit monitoring.
 
 ## Features
 
 - Six logging levels: `NONE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, and `FATAL`
-- `{}` placeholder interpolation with up to five arguments
+- SLF4J-style `{}` interpolation with up to five arguments
 - Automatic Salesforce execution context detection
-- Custom context labels for easier debugging
-- Optional governor-limit reporting
-- Error and fatal exception handling
+- Custom context labels
+- Optional governor-limit monitoring
+- Fatal exception handling
 - No external dependencies
 
 ## Installation
 
-Clone the repository or download the Logger project.
-
-Deploy using Salesforce CLI from the repository root:
+Deploy from the repository root using Salesforce CLI:
 
 ```bash
 sf project deploy start --source-dir projects/logger/main/default/classes
 ```
 
-An authenticated default Salesforce org is required.
+Requires an authenticated default Salesforce org.
 
 ## Usage
 
 ### Logging Levels
 
-Logging methods follow an uppercase naming convention to visually distinguish severity levels from configuration methods.
+Logging methods use uppercase names to visually distinguish severity levels from configuration methods.
 
 ```apex
-Logger.NONE('Unclassified message');
+Logger.NONE('Message suppressed');
 Logger.DEBUG('Processing started');
-Logger.INFO('Records successfully processed');
-Logger.WARN('Processing threshold approaching');
-Logger.ERROR('Failed to process record');
+Logger.INFO('Successfully processed {} records', records.size());
+Logger.WARN('Queue {} exceeded threshold {}', queueName, threshold);
+Logger.ERROR('Failed to process record {}', recordId);
 Logger.FATAL('Critical processing failure');
 ```
 
 | Level | Behavior |
 |---|---|
-| `NONE` | Passes a message to Salesforce's `NONE` debug level |
-| `DEBUG` | General debugging information |
-| `INFO` | Informational messages |
-| `WARN` | Potential problems or unexpected conditions |
-| `ERROR` | Error logging, with optional exception throwing |
-| `FATAL` | Always throws `Logger.FatalException` |
+| `NONE` | No visible log output |
+| `DEBUG` | Debugging information |
+| `INFO` | General informational messages |
+| `WARN` | Warnings and unexpected conditions |
+| `ERROR` | Logs an error without throwing |
+| `FATAL` | Throws `Logger.FatalException` |
 
-Log visibility depends on Salesforce debug log settings. Logger does not implement its own severity filtering.
+Log visibility depends on Salesforce debug log settings.
 
 ### Message Interpolation
 
@@ -60,29 +58,26 @@ Use `{}` placeholders to insert values without string concatenation.
 Logger.INFO('Processing {} Accounts', accounts.size());
 Logger.DEBUG('User {} updated record {}', UserInfo.getName(), accountId);
 Logger.WARN('Processed {} of {} records', processed, total);
+Logger.ERROR('Feature enabled: {}', true);
 ```
 
-Supports up to five arguments per message.
-
-Null arguments are rendered as `null`.
+Supports up to five arguments. Values are converted to strings, including null values.
 
 ### Execution Context
 
-Logger automatically determines the current Salesforce execution context using `Request.getCurrent().getQuiddity()`.
+Logger automatically detects the Salesforce execution context using `Request.getCurrent().getQuiddity()`.
 
-Example output:
+Example:
 
 ```text
 [TRIGGER] Processing 5 Accounts
 ```
 
-Context values depend on how Apex is executing, such as `TRIGGER`, `BATCH_APEX`, or `ANONYMOUS`.
-
-If the execution context cannot be determined, Logger uses `UNKNOWN`.
+When context detection is unavailable, Logger uses `UNKNOWN`.
 
 ### Custom Context
 
-Specify the originating class or method to make logs easier to identify.
+Specify the originating class or method:
 
 ```apex
 Logger.setContext('AccountTriggerHandler.afterInsert');
@@ -90,29 +85,29 @@ Logger.INFO('Processing {} Accounts', accounts.size());
 Logger.clearContext();
 ```
 
-Example output:
+Example:
 
 ```text
 [TRIGGER][AccountTriggerHandler.afterInsert] Processing 5 Accounts
 ```
 
-To suppress custom context labels:
+Suppress custom context labels:
 
 ```apex
 Logger.setNoContext(true);
 ```
 
-Restore custom context labels:
+Restore them:
 
 ```apex
 Logger.setNoContext(false);
 ```
 
-The Salesforce execution context prefix remains visible.
+This does not suppress the automatic Salesforce execution context.
 
 ### Governor Limits
 
-Enable automatic governor-limit reporting after each standard logging call.
+Enable automatic governor-limit summaries:
 
 ```apex
 Logger.showLimits();
@@ -123,13 +118,13 @@ Logger.DEBUG('Processing completed');
 Logger.hideLimits();
 ```
 
-Alternatively, print a one-time summary:
+Print a single summary:
 
 ```apex
 Logger.limits();
 ```
 
-Example output:
+Example:
 
 ```text
 LIMITS [CPU 92/10000ms | DML 2/150 | SOQL 1/100 | Heap 18920/6000000]
@@ -137,72 +132,70 @@ LIMITS [CPU 92/10000ms | DML 2/150 | SOQL 1/100 | Heap 18920/6000000]
 
 Reported metrics include CPU time, DML statements, SOQL queries, and heap usage.
 
-## Exception Handling
+## Error Handling
 
-### Error Logging
+### ERROR
 
-By default, `Logger.ERROR()` writes a debug message without interrupting execution.
+`Logger.ERROR()` writes an error-level debug message without throwing an exception.
 
 ```apex
 Logger.ERROR('Unable to process Account {}', accountId);
 ```
 
-Pass `true` as the final argument to throw `Logger.ErrorException`.
-
-```apex
-Logger.ERROR('Unable to process Account {}', accountId, true);
-```
-
-### Fatal Errors
+### FATAL
 
 `Logger.FATAL()` always throws `Logger.FatalException`.
 
 ```apex
-Logger.FATAL('Critical processing failure for {}', accountId);
+try {
+    Logger.FATAL('Critical failure processing Account {}', accountId);
+} catch (Logger.FatalException ex) {
+    System.debug(ex.getMessage());
+}
 ```
 
-Unlike other logging levels, fatal calls do not write a separate `System.debug()` message before throwing.
+Fatal messages support the same placeholder interpolation as the other levels.
+
+Unlike standard logging methods, `FATAL()` does not write a separate debug message before throwing.
 
 ## Configuration Reference
 
 | Method | Description |
 |---|---|
-| `Logger.setContext(String)` | Assigns a custom context label |
+| `Logger.setContext(String)` | Sets a custom context label |
 | `Logger.getContext()` | Returns the current custom context |
 | `Logger.clearContext()` | Clears the custom context |
 | `Logger.setNoContext(Boolean)` | Suppresses or restores custom context |
-| `Logger.showLimits()` | Enables governor-limit reporting |
-| `Logger.hideLimits()` | Disables automatic limit reporting |
-| `Logger.limits()` | Outputs a one-time governor-limit summary |
+| `Logger.showLimits()` | Enables automatic governor-limit reporting |
+| `Logger.hideLimits()` | Disables automatic governor-limit reporting |
+| `Logger.limits()` | Prints a one-time governor-limit summary |
 
-Configuration is maintained using static variables within the current Apex transaction.
+Configuration uses static state scoped to the current Apex transaction.
 
 ## Testing
 
-Run the included test class:
+Run the included `LoggerTest` class:
 
 ```bash
 sf apex run test --tests LoggerTest --result-format human
 ```
 
-### Interactive Demo
+Tests cover logging method overloads, message interpolation, fatal exceptions, special characters, context settings, and governor-limit reporting execution.
 
-Logger includes a demonstration utility covering logging levels, interpolation, context handling, governor limits, and fatal exception handling.
+## Interactive Demo
 
-Run using Execute Anonymous:
+Logger includes a demonstration utility for Execute Anonymous:
 
 ```apex
 new Logger.Demo().run();
 ```
+
+The demo exercises logging levels, execution context, interpolation, governor-limit summaries, and fatal exception handling.
 
 The demonstration performs no DML operations and catches its simulated fatal exception.
 
 ## Requirements
 
 - Salesforce org with Apex support
-- Salesforce CLI for command-line deployment
+- Salesforce CLI for deployment
 - Compatible Salesforce API version
-
-## License
-
-See the repository's license file, if provided.

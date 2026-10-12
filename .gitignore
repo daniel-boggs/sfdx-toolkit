@@ -18,3 +18,4 @@ coverage/
 .sfdx/
 .localdevserver/
 .deploy/
+/.sf

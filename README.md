@@ -1,14 +1,70 @@
 # SFDX Toolkit
 
-A soon to be growing collection of Apex utilities and Lightning Web Component examples.
+A growing collection of reusable Salesforce Apex utilities, Lightning Web Components, and development tools.
 
+Each project is organized independently, making it easy to explore, understand, and deploy individual solutions without importing the entire repository.
 
-### Note
-This project isn't tied to any org - it's just a public toolkit of code I find useful in Salesforce development.
+## Projects
 
-I'll keep this fresh as come up with new things worth adding.
+| Project | Description | Technology |
+|---|---|---|
+| [Apex Logger](projects/logger/) | Lightweight logging utility featuring structured messages, interpolation, execution context, and governor-limit monitoring. | Apex |
 
-### Updates
-**Oct 2025**
-- Initial structure added
-- Added `Logger` class and test
+More projects will be added as they become available.
+
+## Getting Started
+
+### Requirements
+
+- Visual Studio Code with Salesforce extensions (recommended)
+- Salesforce CLI
+- Access to a Salesforce org with Apex support
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/d-boggs/sfdx-toolkit.git
+cd sfdx-toolkit
+```
+
+### Authenticate with Salesforce
+
+```bash
+sf org login web --set-default
+```
+
+### Deploy a Project
+
+Each project can be deployed individually.
+
+For example, deploy Apex Logger:
+
+```bash
+sf project deploy start --source-dir projects/logger/main/default/classes
+```
+
+Refer to the individual project documentation for features, usage examples, and requirements.
+
+## Repository Structure
+
+```text
+sfdx-toolkit/
+├── projects/
+│   └── logger/
+│       ├── README.md
+│       └── main/
+│           └── default/
+│               └── classes/
+├── README.md
+└── sfdx-project.json
+```
+
+Projects follow Salesforce DX source conventions while remaining independently organized.
+
+## About
+
+This repository is not tied to any specific Salesforce organization.
+
+It contains reusable solutions developed from practical Salesforce development experience, with an emphasis on maintainability, simplicity, and minimizing dependencies.
+
+New projects and improvements will be added over time.

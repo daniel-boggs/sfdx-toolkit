@@ -12,7 +12,7 @@
  * - Print a one-off resource summary with Logger.limits()
  *
  * Logging behavior:
- * - NONE → no visible log output
+ * - NONE → no visible log output (placeholder for logging)
  * - DEBUG, INFO, WARN, ERROR → log only
  * - FATAL → always throws (no System.debug to avoid duplicate log lines)
  *
@@ -112,7 +112,7 @@ public with sharing class Logger {
 
     // ===== Core =====
     private static void log(LoggingLevel level, String message, List<Object> vars) {
-        if (String.isBlank(message)) return;
+        if (level == LoggingLevel.NONE || String.isBlank(message)) return;
 
         String execCtx = getExecutionContext();
         String context = getContext();
@@ -137,14 +137,22 @@ public with sharing class Logger {
 
     // ==== Helper Methods ====
     private static String interpolate(String message, List<Object> vars) {
-        if (vars != null && !vars.isEmpty()) {
-            for (Object var : vars) {
-                String replacement = (var == null) ? 'null' : String.valueOf(var);
-                replacement = replacement.replace('\\', '\\\\').replace('$', '\\$');
-                message = message.replaceFirst('\\{\\}', replacement);
-            }
+        if (vars == null || vars.isEmpty()) return message;
+
+        String result = '';
+        String remaining = message;
+
+        for (Object var : vars) {
+            Integer index = remaining.indexOf('{}');
+            if (index < 0) break;
+
+            String replacement = (var == null) ? 'null' : String.valueOf(var);
+
+            result += remaining.substring(0, index) + replacement;
+            remaining = remaining.substring(index + 2);
         }
-        return message;
+
+        return result + remaining;
     }
 
     private static String getExecutionContext() {
@@ -161,9 +169,9 @@ public with sharing class Logger {
 
     private static String buildLimitSummary() {
         return 'LIMITS [' +
-            'CPU ' + Limits.getCpuTime() + '/' + Limits.getLimitCpuTime() + 'ms | ' +
-            'DML ' + Limits.getDmlStatements() + '/' + Limits.getLimitDmlStatements() + ' | ' +
-            'SOQL ' + Limits.getQueries() + '/' + Limits.getLimitQueries() + ' | ' +
+            'CPU ' + Limits.getCpuTime() + '/' + Limits.getLimitCpuTime() + 'ms │ ' +
+            'DML ' + Limits.getDmlStatements() + '/' + Limits.getLimitDmlStatements() + ' │ ' +
+            'SOQL ' + Limits.getQueries() + '/' + Limits.getLimitQueries() + ' │ ' +
             'Heap ' + Limits.getHeapSize() + '/' + Limits.getLimitHeapSize() +
             ']';
     }
